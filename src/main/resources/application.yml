@@ -1,0 +1,35 @@
+spring:
+    application:
+      name: Library
+
+    thymeleaf:
+      check-template-location: false
+
+    datasource:
+      hikari:
+          maximum-pool-size: ${HIKARI_MAXIMUM_POOL_SIZE:15}
+      driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+      url: jdbc:log4jdbc:postgresql://
+      username:
+      password:
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    encoding:
+      force: true
+    error:
+      include-exception: TRUE
+      # 오류 응답에 stacktrace 내용을 포함할지 여부 (ALWAYS, NEVER, ON_TRACE_PARAM)
+      include-stacktrace: ALWAYS
+      # 오류 응답을 처리할 핸들러(ErrorController)의 path
+#      path: /error
+#      whitelabel:
+#        # 브라우저 요청에 대해 서버 오류시 기본으로 노출할 페이지를 사용할지 여부 (TRUE, FALSE)
+#        enabled: FALSE
+
+
+logging:
+  config: classpath:logging/log4j2.xml
+  logLevelApp: ${LOG_LEVEL:DEBUG}
