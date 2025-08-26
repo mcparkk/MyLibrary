@@ -31,5 +31,6 @@ server:
 
 
 logging:
-  config: classpath:logging/log4j2.xml
+  config: classpath:logging/log4j2-spring.xml
   logLevelApp: ${LOG_LEVEL:DEBUG}
+  logFilePath: logs/

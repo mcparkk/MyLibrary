@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="60">
+
+    <Properties>
+        <Property name="logLevelApp">${sys:logging.logLevelApp:-INFO}</Property>
+        <Property name="logFilePath">${sys:logging.logFilePath:-logs/}</Property>
+        <Property name="appName">MyLibrary</Property>
+
+        <!-- 텍스트 로그 패턴 -->
+        <Property name="pattern">%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level [%X{requestUUID}] [%X{traceId},%X{spanId}] [%c{1}:%L] - %msg%n</Property>
+
+        <!-- 컬러 콘솔 패턴 -->
+        <Property name="patternColored">%style{%d{yyyy-MM-dd HH:mm:ss}}{cyan} %highlight{[%-5level]} [${appName}] %style{[%X{traceId},%X{spanId}]}{magenta} %style{[%c{1}:%L]}{cyan} - %msg%n</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- 컬러 콘솔 (개발용) -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${patternColored}" disableAnsi="false"/>
+        </Console>
+
+        <!-- 일반 텍스트 로그 파일 -->
+        <RollingFile name="RollingFile"
+                     fileName="${logFilePath}/${appName}.log"
+                     filePattern="${logFilePath}.%d{yyyy-MM-dd}.%i.log.gz">
+            <PatternLayout pattern="${pattern}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="60"/>
+        </RollingFile>
+
+        <!-- JSON 로그 파일 (ELK용) -->
+        <RollingFile name="JsonRollingFile"
+                     fileName="${logFilePath}.json"
+                     filePattern="${logFilePath}-%d{yyyy-MM-dd}-%i.json.gz"
+                     immediateFlush="false">
+            <JsonLayout
+                    compact="true"
+                    eventEol="true"
+                    includeStacktrace="true"
+                    properties="true"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="60"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <!-- local 프로파일 -->
+        <SpringProfile name="local">
+            <Logger name="com.mincheol" level="${logLevelApp}" additivity="false">
+                <AppenderRef ref="RollingFile"/>
+                <AppenderRef ref="Console"/>
+            </Logger>
+            <Logger name="org" level="INFO" additivity="false">
+                <AppenderRef ref="RollingFile"/>
+                <AppenderRef ref="Console"/>
+            </Logger>
+            <Logger name="jdbc.resultsettable" level="${logLevelApp}" additivity="false">
+                <AppenderRef ref="RollingFile"/>
+                <AppenderRef ref="Console"/>
+            </Logger>
+            <Logger name="jdbc.sqltiming" level="${logLevelApp}" additivity="false">
+                <AppenderRef ref="RollingFile"/>
+                <AppenderRef ref="Console"/>
+            </Logger>
+        </SpringProfile>
+
+        <!-- dev 프로파일 -->
+        <SpringProfile name="dev">
+            <Logger name="com.mincheol" level="${logLevelApp}" additivity="false">
+                <AppenderRef ref="Console"/>
+            </Logger>
+            <Logger name="org" level="${logLevelApp}" additivity="false">
+                <AppenderRef ref="Console"/>
+            </Logger>
+            <Logger name="jdbc.resultsettable" level="${logLevelApp}" additivity="false">
+                <AppenderRef ref="RollingFile"/>
+                <AppenderRef ref="Console"/>
+            </Logger>
+            <Logger name="jdbc.sqltiming" level="${logLevelApp}" additivity="false">
+                <AppenderRef ref="RollingFile"/>
+                <AppenderRef ref="Console"/>
+            </Logger>
+        </SpringProfile>
+
+        <!-- prod 프로파일 -->
+        <SpringProfile name="prd">
+            <Root level="warn">
+                <AppenderRef ref="RollingFile"/>
+                <AppenderRef ref="JsonRollingFile"/>
+            </Root>
+        </SpringProfile>
+
+        <!-- 공통 루트 로그 -->
+        <Root level="info">
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="JsonRollingFile"/>
+        </Root>
+    </Loggers>
+
+</Configuration>
